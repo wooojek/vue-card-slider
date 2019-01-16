@@ -1,5 +1,5 @@
 <template>
-  <div id="slider" class="slider" @mousemove="mouseMoving">
+  <div id="slider" class="slider" @mousemove="mouseMoving" @touchmove="mouseMoving">
     <div class="slider-cards" :style="`transform: translate3d(${cardsX}px, 0, 0)`">
       <div
         v-for="(slide, index) in slides"
@@ -7,6 +7,9 @@
         class="slider-card"
         @mousedown="startDrag"
         @mouseup="stopDrag"
+        @touchstart="startDrag"
+        @touchend="stopDrag"
+        @touchcancel="stopDrag"
       >
         <img :src="slide.image" :alt="slide.title" draggable="false">
       </div>
@@ -23,7 +26,6 @@
 import TweenLite from 'gsap/TweenLite';
 
 export default {
-  el: '#slider',
   name: 'Slider',
   props: {
     msg: String,
@@ -77,6 +79,7 @@ export default {
       TweenLite.to(this, 0.3, { cardsX: -this.selectedIndex * cardWidth });
     },
     mouseMoving(e) {
+      console.log(e, 'move');
       if (this.dragging) {
         const dragAmount = e.pageX - this.initialMouseX;
         const targetX = this.initialCardsX + dragAmount;
