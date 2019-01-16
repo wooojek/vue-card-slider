@@ -1,5 +1,13 @@
 <template>
   <div id="slider" class="slider" @mousemove="mouseMoving" @touchmove="mouseMoving">
+    <div class="slider-back" :style="`transform: translate3d(${bgX}px, 0, 0)`">
+      <div
+        v-for="(slide, index) in slides"
+        :key="index"
+        class="slider-background"
+        :style="`background-image: url('${slide.image}'); -webkit-filter: blur(10px)`"
+      ></div>
+    </div>
     <div class="slider-cards" :style="`transform: translate3d(${cardsX}px, 0, 0)`">
       <div
         v-for="(slide, index) in slides"
@@ -56,7 +64,9 @@ export default {
       dragging: false,
       initialMouseX: 0,
       initialCardsX: 0,
+      initialBgX: 0,
       cardsX: 0,
+      bgX: 0,
     };
   },
   computed: {
@@ -69,21 +79,26 @@ export default {
       this.dragging = true;
       this.initialMouseX = e.pageX;
       this.initialCardsX = this.cardsX;
+      this.initialBgX = this.bgX;
     },
     stopDrag() {
       this.dragging = false;
 
       const cardWidth = 290;
+      const bgWidth = 375;
       const nearestSlide = -Math.round(this.cardsX / cardWidth);
       this.selectedIndex = Math.min(Math.max(0, nearestSlide), this.slides.length - 1);
-      TweenLite.to(this, 0.3, { cardsX: -this.selectedIndex * cardWidth });
+      TweenLite.to(this, 0.3, {
+        cardsX: -this.selectedIndex * cardWidth,
+        bgX: -this.selectedIndex * bgWidth,
+      });
     },
     mouseMoving(e) {
-      console.log(e, 'move');
       if (this.dragging) {
         const dragAmount = e.pageX - this.initialMouseX;
         const targetX = this.initialCardsX + dragAmount;
         this.cardsX = targetX;
+        this.bgX = this.initialBgX + dragAmount;
       }
     },
   },
@@ -94,8 +109,28 @@ export default {
 .slider {
   overflow: hidden;
   background-color: #1f1140;
-  width: 360px;
-  height: 640px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+.slider-back {
+  position: absolute;
+  width: 1125px;
+  height: 100%;
+  z-index: -1;
+}
+.slider-background {
+  background-size: cover;
+  background-position: center;
+  display: inline-block;
+  background-color: grey;
+  overflow: hidden;
+  padding: 20px 40px;
+  width: 295px;
+  height: 100%;
 }
 .slider-cards {
   position: relative;
